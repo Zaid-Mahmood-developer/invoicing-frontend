@@ -18,11 +18,12 @@ import ChangePassword from "./Components/Auth/ChangePassword";
 import { useSession } from "./customhooks/useSession";
 export default function App() {
   useSession()
+  const signupkey = import.meta.env.VITE_SECRET_SIGNUP_KEY;
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path={`/signup/${import.meta.env.VITE_SECRET_SIGNUP_KEY }`} element={<Signup />} />
+        <Route path={`/signup/${signupkey}`} element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/change-password" element={<ChangePassword />} />
