@@ -1,0 +1,104 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+
+}
+
+:root {
+  --header-background-color: #cc9f9f;
+  --header-menu-color: #000;
+  --header-menu-hover-color: #375a5e;
+  --pageBackground-color: #F5D2D2;
+  --borderOuter-color: #c59c9c;
+  --bg-border-color: #ebc6c6;
+}
+
+/* Header Section Start */
+.menu-bar {
+  padding: 2rem;
+  background-color: var(--header-background-color);
+}
+
+
+.menu-title {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--header-menu-color)
+}
+
+.menu-title:hover {
+  color: var(--header-menu-hover-color)
+}
+
+.menu-active-color {
+  color: var(--header-menu-hover-color);
+}
+
+/* Header Section End */
+
+
+/* Login Page Start */
+
+.container-bg {
+  background-color: var(--pageBackground-color);
+}
+
+/* Login Page End */
+
+/* Landing Page Start */
+.borderClass {
+  background-color: var(--bg-border-color);
+  border-radius: 12px;
+
+}
+
+.borderClass2 {
+  border: 2px solid var(--borderOuter-color);
+  border-radius: 25px;
+  background-color: var(--borderOuter-color);
+}
+
+.main-dashboard {
+  background-color: var(--pageBackground-color);
+}
+
+.tileWrapper{
+  width: 32%;
+}
+.headingWidth{
+  width: 20%;
+}
+.btnWidth{
+  width: 15%;
+}
+.inputLabelData{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* About Section Start */
+
+.liItems {
+  margin: 2em;
+  font-size: large;
+}
+
+/* About Section End */
+
+
+/* Media queries */
+
+.responsive-btn {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .responsive-btn {
+    width: 25%;
+  }
+}
+
+
