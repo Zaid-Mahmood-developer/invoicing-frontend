@@ -19,6 +19,7 @@ import { useSession } from "./customhooks/useSession";
 export default function App() {
   useSession()
   const signupkey = import.meta.env.VITE_SECRET_SIGNUP_KEY;
+  console.log("Signup Key:", signupkey);
   return (
     <Router>
       <Routes>
