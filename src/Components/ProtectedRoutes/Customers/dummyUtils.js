@@ -31,22 +31,29 @@ export const validationSchema = Yup.object({
   .required("NTN or CNIC is required")
   .test(
     "ntn-cnic-format",
-    "Must be a valid NTN (7 digits) or CNIC (13 digits, digits only — no dashes)",
+    "Must be: 7 digits, OR 1 alphabet + 6 digits, OR CNIC (13 digits, digits only)",
     (value) => {
       if (!value) return false;
-      if (/\D/.test(value)) return false;
-      const isNTN = value.length === 7;
-      const isCNIC = value.length === 13;
-      return isNTN || isCNIC;
+
+      // Patterns
+      const sevenDigits = /^[0-9]{7}$/;             // NTN option 1
+      const alphaSixDigits = /^[A-Za-z][0-9]{6}$/;  // NTN option 2
+      const cnic = /^[0-9]{13}$/;                   // CNIC
+
+      return (
+        sevenDigits.test(value) ||
+        alphaSixDigits.test(value) ||
+        cnic.test(value)
+      );
     }
   )
-    .required("NTN or CNIC is required"),
+,
   address: Yup.string()
     .matches(/^[A-Za-z0-9\s,.\-\/()]+$/, "Invalid characters in address")
     .required("Address is required"),
-  contact: Yup.string()
-    .matches(/^\+92-[0-9]{3}-[0-9]{7}$/, "Format must be +92-XXX-XXXXXXX")
-    .required("Contact number is required"),
+contact: Yup.string()
+  .matches(/^[0-9]{3}-[0-9]{7}$/, "Format must be XXX-XXXXXXX")
+  .required("Contact number is required"),
   
   province: Yup.string()
     .test(

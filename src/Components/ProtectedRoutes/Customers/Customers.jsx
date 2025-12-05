@@ -28,22 +28,33 @@ export default function Customers() {
     initialValues,
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
+      const finalValues = {
+        ...values,
+        contact: `+92-${values.contact}`
+      };
+
       if (editMode.active && currentCustomerId) {
-        await updateData(values);
+        await updateData(finalValues);
       } else {
-        await registerUser(values);
-      } 
+        await registerUser(finalValues);
+      }
       resetForm();
     },
   });
 
-  const editCustomerFunc = (id) => {
-    const findCustomer = totalCustomers.find((item) => item._id === id);
-    if (findCustomer) {
-      formik.setValues(findCustomer);
-      setEditMode({ active: true, id });
-    }
-  };
+const editCustomerFunc = (id) => {
+  const findCustomer = totalCustomers.find((item) => item._id === id);
+  if (findCustomer) {
+    // Strip +92- if it exists
+    const contactWithoutPrefix = findCustomer.contact?.replace(/^\+92-/, "") || "";
+    formik.setValues({
+      ...findCustomer,
+      contact: contactWithoutPrefix,
+    });
+    setEditMode({ active: true, id });
+  }
+};
+
 
   const delCustomerFunc = (id) => {
     Swal.fire({
@@ -103,169 +114,205 @@ export default function Customers() {
   }, [getData, getError]);
 
   return (
- <>
-  {postLoading || putLoading || delLoading || getLoading ? (
-    <Spinner />
-  ) : (
-    <div
-      className="container-fluid p-4 main-dashboard vh-100"
-      style={{
-        background: "linear-gradient(135deg, #0A5275 0%, #0b0b0b 100%)",
-      }}
-    >
-      {/* GLASS CARD FORM */}
-      <div
-        className="p-4 shadow-lg rounded-4"
-        style={{
-          background: "rgba(255,255,255,0.88)",
-          backdropFilter: "blur(6px)",
-        }}
-      >
-        <h2 className="fw-bold mb-2" style={{ color: "#0A5275" }}>
-          👤 Customer Management
-        </h2>
-
-        <h3
+    <>
+      {postLoading || putLoading || delLoading || getLoading ? (
+        <Spinner />
+      ) : (
+        <div
+          className="container-fluid p-4 main-dashboard vh-100"
           style={{
-            color: "#0A5275",
-            fontWeight: "600",
+            background: "linear-gradient(135deg, #0A5275 0%, #0b0b0b 100%)",
           }}
         >
-          {editMode.active ? "✏️ Edit Customer" : "➕ Add Customer"}
-        </h3>
-
-        <form onSubmit={formik.handleSubmit}>
-          <div className="container">
-            <div className="row">
-              {inputBox.map((input, id) => (
-                <div key={id} className="col-md-4 col-sm-12">
-                  <label style={{ fontWeight: 600, color: "#0A5275" }}>
-                    {input.label}
-                  </label>
-
-                  {input.type === "dropdown" ? (
-                    <select
-                      name={input.name}
-                      className={`form-select mb-3 ${
-                        formik.touched[input.name] && formik.errors[input.name]
-                          ? "is-invalid"
-                          : ""
-                      }`}
-                      value={formik.values[input.name]}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      style={{ borderColor: "#0A5275", padding: "10px" }}
-                    >
-                      <option value="">{input.placeholder}</option>
-                      {input.options.map((option, idx) => (
-                        <option key={idx} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      className={`form-control mb-3 ${
-                        formik.touched[input.name] && formik.errors[input.name]
-                          ? "is-invalid"
-                          : ""
-                      }`}
-                      type={input.type}
-                      name={input.name}
-                      placeholder={input.placeholder}
-                      value={formik.values[input.name]}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      style={{ borderColor: "#0A5275", padding: "10px" }}
-                    />
-                  )}
-
-                  {formik.touched[input.name] && formik.errors[input.name] && (
-                    <div className="invalid-feedback">
-                      {formik.errors[input.name]}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="btn mt-3"
+          {/* GLASS CARD FORM */}
+          <div
+            className="p-4 shadow-lg rounded-4"
             style={{
-              background: "#0A5275",
-              color: "white",
-              fontWeight: 600,
+              background: "rgba(255,255,255,0.88)",
+              backdropFilter: "blur(6px)",
             }}
           >
-            {editMode.active ? (
-              <>
-                <RxUpdate className="fs-5" /> Update Customer
-              </>
-            ) : (
-              <>
-                <IoAddOutline className="fs-4" /> Add Customer
-              </>
-            )}
-          </button>
-        </form>
-      </div>
+            <h2 className="fw-bold mb-2" style={{ color: "#0A5275" }}>
+              👤 Customer Management
+            </h2>
 
-      {/* CUSTOMER TABLE */}
-      <div
-        className="table-responsive shadow-lg rounded-4 p-3 mt-4"
-        style={{
-          background: "rgba(255,255,255,0.88)",
-          backdropFilter: "blur(6px)",
-        }}
-      >
-        <table className="table table-hover text-center">
-          <thead style={{ background: "#0A5275", color: "white" }}>
-            <tr>
-              {tableHeading.map((heading, id) => (
-                <th key={id} scope="col">
-                  {heading}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {totalCustomers?.map((item, id) => (
-              <tr key={item._id}>
-                <th scope="row">{id + 1}</th>
-                <td>{item.name}</td>
-                <td>{item.ntnCnic}</td>
-                <td>{item.address}</td>
-                <td>{item.contact}</td>
-                <td>{item.province}</td>
-                <td>{item.customertype}</td>
-                <td>
-                  <button
-                    onClick={() => editCustomerFunc(item._id)}
-                    className="btn btn-sm me-2"
-                    style={{
-                      background: "#0A5275",
-                      color: "white",
-                    }}
-                  >
-                    <MdModeEdit /> Edit
-                  </button>
-                  <button
-                    onClick={() => delCustomerFunc(item._id)}
-                    className="btn btn-sm btn-danger"
-                  >
-                    <MdDelete /> Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            <h3
+              style={{
+                color: "#0A5275",
+                fontWeight: "600",
+              }}
+            >
+              {editMode.active ? "✏️ Edit Customer" : "➕ Add Customer"}
+            </h3>
+
+            <form onSubmit={formik.handleSubmit}>
+              <div className="container">
+                <div className="row">
+                  {inputBox.map((input, id) => (
+                    <div key={id} className="col-md-4 col-sm-12">
+                      <label style={{ fontWeight: 600, color: "#0A5275" }}>
+                        {input.label}
+                      </label>
+
+                      {input.type === "dropdown" ? (
+                        <select
+                          name={input.name}
+                          className={`form-select mb-3 ${formik.touched[input.name] && formik.errors[input.name]
+                              ? "is-invalid"
+                              : ""
+                            }`}
+                          value={formik.values[input.name]}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          style={{ borderColor: "#0A5275", padding: "10px" }}
+                        >
+                          <option value="">{input.placeholder}</option>
+                          {input.options.map((option, idx) => (
+                            <option key={idx} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      )
+                        : input.name === "contact" ? (
+                          // 🔵 Custom Contact Field with +92-
+                        <div className="input-group mb-3">
+  <span className="input-group-text">+92-</span>
+
+  <input
+    type="text"
+    name="contact"
+    className={`form-control ${
+      formik.touched.contact && formik.errors.contact ? "is-invalid" : ""
+    }`}
+    placeholder="300-1234567"
+    value={formik.values.contact}
+    onChange={(e) => {
+      let value = e.target.value.replace(/[^0-9]/g, ""); // allow digits only
+
+      // auto-add dash after first 3 digits
+      if (value.length > 3) {
+        value = value.slice(0, 3) + "-" + value.slice(3);
+      }
+
+      // restrict max length: 3 + 1 + 7 = 11
+      if (value.length > 11) return;
+
+      formik.setFieldValue("contact", value);
+    }}
+    onBlur={formik.handleBlur}
+    style={{ borderColor: "#0A5275", padding: "10px" }}
+  />
+
+  {formik.touched.contact && formik.errors.contact && (
+    <div className="invalid-feedback">{formik.errors.contact}</div>
   )}
-</>
+</div>
+
+                        )
+                          :
+                          (
+                            <input
+                              className={`form-control mb-3 ${formik.touched[input.name] && formik.errors[input.name]
+                                  ? "is-invalid"
+                                  : ""
+                                }`}
+                              type={input.type}
+                              name={input.name}
+                              placeholder={input.placeholder}
+                              value={formik.values[input.name]}
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              style={{ borderColor: "#0A5275", padding: "10px" }}
+                            />
+                          )}
+
+                      {formik.touched[input.name] && formik.errors[input.name] && (
+                        <div className="invalid-feedback">
+                          {formik.errors[input.name]}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn mt-3"
+                style={{
+                  background: "#0A5275",
+                  color: "white",
+                  fontWeight: 600,
+                }}
+              >
+                {editMode.active ? (
+                  <>
+                    <RxUpdate className="fs-5" /> Update Customer
+                  </>
+                ) : (
+                  <>
+                    <IoAddOutline className="fs-4" /> Add Customer
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* CUSTOMER TABLE */}
+          <div
+            className="table-responsive shadow-lg rounded-4 p-3 mt-4"
+            style={{
+              background: "rgba(255,255,255,0.88)",
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            <table className="table table-hover text-center">
+              <thead style={{ background: "#0A5275", color: "white" }}>
+                <tr>
+                  {tableHeading.map((heading, id) => (
+                    <th key={id} scope="col">
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {totalCustomers?.map((item, id) => (
+                  <tr key={item._id}>
+                    <th scope="row">{id + 1}</th>
+                    <td>{item.name}</td>
+                    <td>{item.ntnCnic}</td>
+                    <td>{item.address}</td>
+                    <td>{item.contact}</td>
+                    <td>{item.province}</td>
+                    <td>{item.customertype}</td>
+                    <td>
+                      <button
+                        onClick={() => editCustomerFunc(item._id)}
+                        className="btn btn-sm me-2"
+                        style={{
+                          background: "#0A5275",
+                          color: "white",
+                        }}
+                      >
+                        <MdModeEdit /> Edit
+                      </button>
+                      <button
+                        onClick={() => delCustomerFunc(item._id)}
+                        className="btn btn-sm btn-danger"
+                      >
+                        <MdDelete /> Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </>
 
   );
 }
