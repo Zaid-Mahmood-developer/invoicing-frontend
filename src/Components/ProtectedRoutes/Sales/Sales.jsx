@@ -22,13 +22,13 @@ const Sales = () => {
   const [editIndex, setEditIndex] = useState(null);
   const [date, setDate] = useState("");
   const { data: sellerData, loading, error, fetchData: fetchSeller } = useGetApi(getSellerUrl, true);
-  const { data: allCustomers, fetchData: fetchAllCustomers } = useGetApi(null, false);
-  const { data: allProducts, fetchData: fetchAllProducts } = useGetApi(null, false);
+  const { data: allCustomers, fetchData: fetchAllCustomers, loading: customerLoading, error: customerErr } = useGetApi(null, false);
+  const { data: allProducts, fetchData: fetchAllProducts, loading: productsLoading, error: productsErr } = useGetApi(null, false);
 
   const [sellerInfo, setSellerInfo] = useState(null);
   const formik = useFormik({
     initialValues,
-    validationSchema ,
+    validationSchema,
     onSubmit: (values, { resetForm }) => {
       const beforeTax = values.productQty * values.productPrice;
       const price = values.productPrice;
@@ -89,7 +89,6 @@ const Sales = () => {
       setEditModeAndProductNameAndCustomerValue((prev) => ({ ...prev, editProductName: false }))
     },
   });
-console.log(getProductsData , "productsDaata")
   const handleEdit = (item, index) => {
     formik.setValues({
       customerValue: item.customerValue || "",
@@ -202,15 +201,15 @@ console.log(getProductsData , "productsDaata")
     retrieveValues
   ]);
 
-useEffect(() => {
-  if(retrieveProductValues?.taxType?.saleType == "3rd Schedule Goods") {
-  const qty = parseFloat(formik.values.productQty) || 0;
-  const price = parseFloat(formik.values.productPrice) || 0;
-  const valueExTax = qty * price;
+  useEffect(() => {
+    if (retrieveProductValues?.taxType?.saleType == "3rd Schedule Goods") {
+      const qty = parseFloat(formik.values.productQty) || 0;
+      const price = parseFloat(formik.values.productPrice) || 0;
+      const valueExTax = qty * price;
 
-  formik.setFieldValue("valueWithoutTax", valueExTax);
-  }
-}, [formik.values.productQty, formik.values.productPrice]);
+      formik.setFieldValue("valueWithoutTax", valueExTax);
+    }
+  }, [formik.values.productQty, formik.values.productPrice]);
 
   return (
     <>
@@ -272,6 +271,13 @@ useEffect(() => {
                       <>
                         <div className="d-flex align-items-center" style={{ marginBottom: "10px" }}>
                           <label className="form-label w-25 fw-bold" style={{ color: "#0A5275" }}>{item.paragraphHeading}</label>
+                          {customerLoading && <div class="spinner-border text-info" role="status">
+                            <span class="sr-only"></span>
+                          </div>}
+                          {customerErr && (
+                            <p style={{ color: "red" }}>{customerErr.message}</p>
+                          )
+                          }
                           <select
                             name="customerValue"
                             className="form-select p-2"
@@ -398,6 +404,13 @@ useEffect(() => {
                   {/* Product Dropdown */}
                   <div className="inputLabelData" style={{ marginBottom: "10px" }}>
                     <label className="w-25" style={{ fontWeight: "600" }}>Product Name</label>
+                    {productsErr && (
+                      <p style={{ color: "red" }}>{productsErr.message}</p>
+                    )}
+
+                    {productsLoading && <div class="spinner-border text-info" role="status">
+                      <span class="sr-only"></span>
+                    </div>}
                     <select
                       name="productValue"
                       className="form-select p-2"
@@ -407,20 +420,26 @@ useEffect(() => {
                         formik.handleChange(e);
                         const productdescription = e.target.value;
                         if (productdescription && allProducts?.products) {
-                          const selected = allProducts?.products.find(
+                          const selected = allProducts.products.find(
                             (proDesc) => proDesc.description === productdescription
                           );
+
                           setRetriveProductValues(selected || null);
                         } else {
                           setRetriveProductValues(null);
                         }
+
                         setEditModeAndProductNameAndCustomerValue((prev) => ({
                           ...prev,
                           editProductName: true,
                         }));
                       }}
                       onBlur={formik.handleBlur}
-                      style={{ borderColor: "#0A5275", backgroundColor: "#d9edf2", color: "#0A5275" }}
+                      style={{
+                        borderColor: "#0A5275",
+                        backgroundColor: "#d9edf2",
+                        color: "#0A5275",
+                      }}
                     >
                       <option value="">Select Product Description</option>
                       {allProducts?.products?.map((product, index) => (
@@ -429,6 +448,7 @@ useEffect(() => {
                         </option>
                       ))}
                     </select>
+
                   </div>
                   {formik.touched.productValue && formik.errors.productValue && (
                     <div style={{ color: "red", textAlign: "center" }}>{formik.errors.productValue}</div>

@@ -111,7 +111,6 @@ const CreditNote = () => {
   //     items: items,
   //     grandTotal: grandTotal,
   //   };
-  //   console.log(submitData, "submitReturnData")
   //   await postFbrData((submitData),
   //     { Authorization: `Bearer ${findSpecificInvoice?.FBRToken}` }
   //   );

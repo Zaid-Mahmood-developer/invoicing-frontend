@@ -15,7 +15,6 @@ export const useDeleteApi = () => {
             setData(response.data)
         }
         catch (error) {
-            console.log(error , "delErr")
             setData(null);
             setError(error.response?.data || { message: "Something went wrong" });
         }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const VoiceInput = ({ onVoiceCommand }) => {
-  console.log(onVoiceCommand , "voiceCommand")
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
 

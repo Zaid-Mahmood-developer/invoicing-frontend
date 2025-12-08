@@ -5,7 +5,6 @@ api.interceptors.response.use(
   res => res,
   async err => {
     if (err.response?.status === 401 && !err.config._retry) {
-      console.log(err.response?.status , "stats")
       err.config._retry = true;
 
       try {
@@ -19,7 +18,6 @@ api.interceptors.response.use(
 
         return api(err.config);
       } catch (refreshErr) {
-        console.log(refreshErr , "reErr")
         window.location.href = "/";
       }
     }
