@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { todayTile, monthTile } from "./dummyUtils";
 import { useGetApi } from "../../../customhooks/useGetApi";
 import InvoicePdf from "../../Invoices/InvoicePdf";
+import Spinner from "../../utils/Spinner/Spinner"
 const MainDashboard = () => {
     const [invoiceData, setInvoiceData] = useState(null);
     const handlePrint = (fbrId, data) => {
@@ -59,7 +60,11 @@ const MainDashboard = () => {
     };
 
     return (
-        <div
+        <>
+        {loading ?
+        <Spinner />
+    :
+         <div
             className="container-fluid main-dashboard vh-100 p-4"
             style={{
                 background: "linear-gradient(135deg, #0A5275 0%, #0b0b0b 100%)",
@@ -157,7 +162,8 @@ const MainDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {dashboardData?.recentInvoices?.length > 0 && (
+                            {dashboardData?.recentInvoices?.length > 0 ?
+                             (
                                 dashboardData.recentInvoices.map((invoice, invoiceIndex) => (
                                     invoice.items.map((item, itemIndex) => (
                                         <tr key={`${invoiceIndex}-${itemIndex}`}>
@@ -183,7 +189,12 @@ const MainDashboard = () => {
                                         </tr>
                                     ))
                                 ))
-                            )}
+                            )
+                        :
+                        <tr>
+                            <td className="fw-bold" colSpan="10">No invoices found.</td>
+                        </tr>
+                        }
                         </tbody>
 
                     </table>
@@ -193,6 +204,10 @@ const MainDashboard = () => {
                 <InvoicePdf invoice={invoiceData} />
             </div>
         </div>
+    }
+
+        </>
+        
     );
 };
 
