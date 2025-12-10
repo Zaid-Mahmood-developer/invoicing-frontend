@@ -1,5 +1,6 @@
 import { Outlet, Navigate } from "react-router-dom";
 import Menu from "./Navbar/Menu";
+import Footer from "./Footer/Footer";
 import Spinner from "../utils/Spinner/Spinner";
 import { useSelector } from "react-redux";
 const ProtectedRoutes = () => {
@@ -11,6 +12,7 @@ const ProtectedRoutes = () => {
         <>
             <Menu />
             <Outlet />
+            <Footer />
         </>
     ) : (
         <Navigate to="/" />
