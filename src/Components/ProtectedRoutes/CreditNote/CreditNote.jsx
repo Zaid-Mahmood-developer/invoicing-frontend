@@ -129,6 +129,7 @@ const CreditNote = () => {
 
       const finalError = vr?.error || arrayError || "Something went wrong";
       if (vr.statusCode === "01") {
+        console.log(finalError , vr , "vrr")
         Swal.fire({ icon: "error", title: "Error", text: finalError });
         return;
       }
