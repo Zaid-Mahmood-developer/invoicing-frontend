@@ -89,26 +89,26 @@ const CreditNote = () => {
     setGrandTotal(total);
   }, [items]);
 
-  const submitInvoice = async () => {
-    // const submitData = {
-    //   invoiceType: "Credit Note",
-    //   invoiceDate: date,
-    //   sellerNTNCNIC: findSpecificInvoice.sellerNTNCNIC,
-    //   sellerBusinessName: findSpecificInvoice.sellerBusinessName,
-    //   sellerProvince: findSpecificInvoice.sellerProvince,
-    //   sellerAddress: findSpecificInvoice.sellerAddress,
+  const submitInvoice =  () => {
+    const submitData = {
+      invoiceType: "Credit Note",
+      invoiceDate: date,
+      sellerNTNCNIC: findSpecificInvoice.sellerNTNCNIC,
+      sellerBusinessName: findSpecificInvoice.sellerBusinessName,
+      sellerProvince: findSpecificInvoice.sellerProvince,
+      sellerAddress: findSpecificInvoice.sellerAddress,
 
-    //   buyerNTNCNIC: findSpecificInvoice.buyerNTNCNIC,
-    //   buyerBusinessName: findSpecificInvoice.buyerBusinessName,
-    //   buyerProvince: findSpecificInvoice.buyerProvince,
-    //   buyerAddress: findSpecificInvoice.buyerAddress,
-    //   buyerRegistrationType: findSpecificInvoice.buyerRegistrationType,
-    //   scenarioId: findSpecificInvoice.scenarioId,
-    //   invoiceRefNo: findSpecificInvoice.fbrResponse,
-    //   FBRToken: findSpecificInvoice.FBRToken,
-    //   items: items,
-    //   grandTotal: grandTotal,
-    // };
+      buyerNTNCNIC: findSpecificInvoice.buyerNTNCNIC,
+      buyerBusinessName: findSpecificInvoice.buyerBusinessName,
+      buyerProvince: findSpecificInvoice.buyerProvince,
+      buyerAddress: findSpecificInvoice.buyerAddress,
+      buyerRegistrationType: findSpecificInvoice.buyerRegistrationType,
+      scenarioId: findSpecificInvoice.scenarioId,
+      invoiceRefNo: findSpecificInvoice.fbrResponse,
+      FBRToken: findSpecificInvoice.FBRToken,
+      items: items,
+      grandTotal: grandTotal,
+    };
     console.log(submitData, "submitReturnData")
     // await postFbrData((submitData),
     //   { Authorization: `Bearer ${findSpecificInvoice?.FBRToken}` }
