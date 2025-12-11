@@ -89,7 +89,7 @@ const CreditNote = () => {
     setGrandTotal(total);
   }, [items]);
 
-  const submitInvoice =  () => {
+  const submitInvoice = async () => {
     const submitData = {
       invoiceType: "Credit Note",
       invoiceDate: date,
@@ -110,45 +110,45 @@ const CreditNote = () => {
       grandTotal: grandTotal,
     };
     console.log(submitData, "submitReturnData")
-    // await postFbrData((submitData),
-    //   { Authorization: `Bearer ${findSpecificInvoice?.FBRToken}` }
-    // );
+    await postFbrData((submitData),
+      { Authorization: `Bearer ${findSpecificInvoice?.FBRToken}` }
+    );
   }
 
-  // useEffect(() => {
-  //   const submitToLocalApi = async () => {
-  //     const vr = fbrData?.validationResponse;
-  //     if (!vr) return;
-  //     const arrayError = vr?.invoiceStatuses?.length
-  //       ? vr.invoiceStatuses.map((s) => `Item ${s.itemSNo}: ${s.error}`).join("\n")
-  //       : null;
+  useEffect(() => {
+    const submitToLocalApi = async () => {
+      const vr = fbrData?.validationResponse;
+      if (!vr) return;
+      const arrayError = vr?.invoiceStatuses?.length
+        ? vr.invoiceStatuses.map((s) => `Item ${s.itemSNo}: ${s.error}`).join("\n")
+        : null;
 
-  //     const finalError = vr?.error || arrayError || "Something went wrong";
-  //     if (vr.statusCode === "01") {
-  //       Swal.fire({ icon: "error", title: "Error", text: finalError });
-  //       return;
-  //     }
+      const finalError = vr?.error || arrayError || "Something went wrong";
+      if (vr.statusCode === "01") {
+        Swal.fire({ icon: "error", title: "Error", text: finalError });
+        return;
+      }
 
-  //     if (vr.statusCode === "00") {
-  //       Swal.fire({
-  //         icon: "success",
-  //         title: "Success",
-  //         text: "Invoice sent to FBR portal successfully",
-  //       });
-  //       const localSubmitData = {
-  //         ...submitData
-  //       };
-  //       await postData(localSubmitData);
-  //       Swal.fire({
-  //         icon: fbrError ? "error" : "success",
-  //         title: fbrError ? "Error" : "Success",
-  //         text: fbrError ? fbrError.message : "Invoice saved locally successfully",
-  //       });
-  //     }
+      if (vr.statusCode === "00") {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Invoice sent to FBR portal successfully",
+        });
+        const localSubmitData = {
+          ...fbrData
+        };
+        await postData(localSubmitData);
+        Swal.fire({
+          icon: fbrError ? "error" : "success",
+          title: fbrError ? "Error" : "Success",
+          text: fbrError ? fbrError.message : "Invoice saved locally successfully",
+        });
+      }
 
-  //   }
-  //   submitToLocalApi();
-  // }, [fbrData]);
+    }
+    submitToLocalApi();
+  }, [fbrData]);
   
   return (
     <>
