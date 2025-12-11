@@ -117,10 +117,7 @@ const CreditNote = () => {
 
   useEffect(() => {
     const submitToLocalApi = async () => {
-      if(fbrData === null || fbrData === undefined){
-         Swal.fire({ icon: "error", title: "Error", text: "Network error while posting data to FBR" });
-         return;
-      };
+     
       const vr = fbrData?.validationResponse;
       if (!vr) return;
       const arrayError = vr?.invoiceStatuses?.length
