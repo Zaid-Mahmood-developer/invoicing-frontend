@@ -116,8 +116,12 @@ const CreditNote = () => {
   }
 
   useEffect(() => {
+    console.log("fbr api Called")
     const submitToLocalApi = async () => {
-     
+      if(fbrData === null || fbrData === undefined){
+         Swal.fire({ icon: "error", title: "Error", text: "Network error while posting data to FBR" });
+         return;
+      };
       const vr = fbrData?.validationResponse;
       if (!vr) return;
       const arrayError = vr?.invoiceStatuses?.length
@@ -126,6 +130,7 @@ const CreditNote = () => {
 
       const finalError = vr?.error || arrayError || "Something went wrong";
       if (vr.statusCode === "01") {
+        console.log(finalError , vr , "vrr")
         Swal.fire({ icon: "error", title: "Error", text: finalError });
         return;
       }
@@ -150,7 +155,7 @@ const CreditNote = () => {
     }
     submitToLocalApi();
   }, [fbrData]);
-  console.log(fbrData , "fbrData")
+  
   return (
     <>
       { loading || localLoading ? (
