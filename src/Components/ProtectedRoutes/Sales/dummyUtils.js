@@ -11,10 +11,15 @@ export const scenarioId = [
 
 export const addItem = [
   { heading: "Add Item" },
-  { type: "dropDown", prductDescriptionHeading: "Product Name", productDescription: [], HsCode: "", Qunatity: 0, valueWithoutTax: "", salesTax: "", furtherTax: "" }
+  { type: "dropDown", prductDescriptionHeading: "Product Name", productDescription: [], HsCode: "", Qunatity: 0, valueWithoutTax: "", salesTax: "", furtherTax: "", InvoiceNo: "", DCNo: "" }
 ]
 
 export const initialValues = {
+  invoiceType: "Sale Invoice",
+  InvoiceNo: "",
+  DCNo: "",
+  poNumber: "",
+  quantityInNumber: "",
   customerValue: "",
   productValue: "",
   customertype: "",
@@ -60,6 +65,13 @@ export const SRO_ItemSerial_Options_ZeroRate = {
  "SECTION 4(b)": [""],
 };
 export const validationSchema = Yup.object({
+
+  InvoiceNo: Yup.string()
+    .max(10, "Invoice No cannot exceed 10 characters")
+    .notRequired(),
+  DCNo: Yup.string()
+    .max(10, "DC No cannot exceed 10 characters")
+    .notRequired(),
   customerValue: Yup.string().when("customertype", {
     is: (val) => !!val,
     then: (schema) => schema.required("Buyer name is required"),

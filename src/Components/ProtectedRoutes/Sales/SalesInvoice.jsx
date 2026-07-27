@@ -13,6 +13,8 @@ const SalesInvoice = ({
   signupValues,
   buyerValues,
   selectedScenarioId,
+  invoiceNo,
+  dcNo,
 }) => {
 
   const signupValuesNtnCnic = signupValues?.NTNCNIC?.toString();
@@ -20,7 +22,7 @@ const SalesInvoice = ({
   const postFbrApiUrl = import.meta.env.VITE_API_URL_FBR_SALES_URL;
   const postLocalApiUrl = `${import.meta.env.VITE_API_URL}saleinvoice`;
 
-  const { registerUser: postFbrInvoice, data, loading } = usePostFbr(postFbrApiUrl);
+  const { registerUser: postFbrInvoice, loading } = usePostFbr(postFbrApiUrl);
   const { registerUser: postLocalInvoice } = usePostApi(postLocalApiUrl);
 
   const [grandTotal, setGrandTotal] = useState(0);
@@ -37,26 +39,97 @@ const SalesInvoice = ({
   };
 
   const submitInvoice = async () => {
-    await postFbrInvoice(
-      {
-        invoiceType: "Sale Invoice",
-        invoiceDate: date,
-        sellerNTNCNIC: signupValuesNtnCnic,
-        sellerBusinessName: signupValues?.BusinessName,
-        sellerProvince: signupValues?.Province,
-        sellerAddress: signupValues?.Address,
-        buyerNTNCNIC: buyerValues?.ntnCnic,
-        buyerBusinessName: buyerValues?.name,
-        buyerProvince: buyerValues?.province,
-        buyerAddress: buyerValues?.address,
-        buyerRegistrationType: buyerValues?.customertype,
-        invoiceRefNo: "",
-        scenarioId: selectedScenarioId,
-        items: submitInvoiceData,
-      },
+    const commonPayload = {
+      invoiceType: "Sale Invoice",
+      invoiceDate: date,
+      sellerNTNCNIC: signupValuesNtnCnic,
+      sellerBusinessName: signupValues?.BusinessName,
+      sellerProvince: signupValues?.Province,
+      sellerAddress: signupValues?.Address,
+      buyerNTNCNIC: buyerValues?.ntnCnic,
+      buyerBusinessName: buyerValues?.name,
+      buyerProvince: buyerValues?.province,
+      buyerAddress: buyerValues?.address,
+      buyerRegistrationType: buyerValues?.customertype,
+      invoiceRefNo: "",
+      scenarioId: selectedScenarioId,
+    };
+
+    const fbrResponse = await postFbrInvoice(
+      { ...commonPayload, items: submitInvoiceData },
       { Authorization: `Bearer ${signupValues?.FBRToken}` }
     );
+
+    if (fbrResponse?.error) {
+      Swal.fire({
+        icon: "error",
+        title: "FBR submission failed",
+        text:
+          typeof fbrResponse.error === "string"
+            ? fbrResponse.error
+            : fbrResponse.error?.message || "Something went wrong",
+      });
+      return;
+    }
+
+    const validationResponse = fbrResponse?.validationResponse;
+    if (validationResponse?.statusCode !== "00") {
+      const itemErrors = validationResponse?.invoiceStatuses
+        ?.map((status) => `Item ${status.itemSNo}: ${status.error}`)
+        .join("\n");
+
+      Swal.fire({
+        icon: "error",
+        title: "FBR submission failed",
+        text:
+          validationResponse?.error ||
+          itemErrors ||
+          "FBR did not accept the invoice",
+      });
+      return;
+    }
+
+    const localItems = submitInvoiceData.map((item, index) => ({
+      ...item,
+      poNumber: getProductsData[index]?.poNumber ?? "",
+      quantityInNumber:
+        getProductsData[index]?.quantityInNumber === ""
+          ? ""
+          : Number(getProductsData[index]?.quantityInNumber ?? 0),
+    }));
+
+    const localResponse = await postLocalInvoice({
+      ...commonPayload,
+      invoiceNo,
+      dcNo,
+      items: localItems,
+      FBRToken: signupValues?.FBRToken,
+      fbrResponse: fbrResponse?.invoiceNumber,
+      fbrResponseDate: fbrResponse?.dated,
+      grandTotal,
+    });
+
+    if (localResponse?.error || localResponse?.status === false) {
+      Swal.fire({
+        icon: "error",
+        title: "Local save failed",
+        text:
+          localResponse?.message ||
+          (typeof localResponse?.error === "string"
+            ? localResponse.error
+            : localResponse?.error?.message) ||
+          "The invoice was accepted by FBR but could not be saved locally",
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: "Invoice submitted to FBR and saved locally successfully",
+    });
   };
+
 
   useEffect(() => {
     if (!getProductsData || getProductsData.length === 0) {
@@ -156,65 +229,42 @@ const SalesInvoice = ({
     setGrandTotal(Number(total.toFixed(2)));
   }, [getProductsData]);
 
+  // const submitInvoice = () => {
+        // const localItems = submitInvoiceData.map((item, index) => ({
+        //   ...item,
+        //   poNumber: getProductsData[index]?.poNumber ?? "",
+        //   quantityInNumber:
+        //     getProductsData[index]?.quantityInNumber === ""
+        //       ? ""
+        //       : Number(getProductsData[index]?.quantityInNumber ?? 0),
+        // }));
 
-  useEffect(() => {
-    const submitToLocalApi = async () => {
-      const vr = data?.validationResponse;
-      if (!vr) return;
+        // const localApiPayload = {
+        //   invoiceType: "Sale Invoice",
+        //   invoiceDate: date,
+        //   sellerNTNCNIC: signupValuesNtnCnic,
+        //   sellerBusinessName: signupValues?.BusinessName,
+        //   sellerProvince: signupValues?.Province,
+        //   sellerAddress: signupValues?.Address,
 
-      const arrayError = vr?.invoiceStatuses?.length
-        ? vr.invoiceStatuses.map((s) => `Item ${s.itemSNo}: ${s.error}`).join("\n")
-        : null;
+        //   buyerNTNCNIC: buyerValues?.ntnCnic,
+        //   buyerBusinessName: buyerValues?.name,
+        //   buyerProvince: buyerValues?.province,
+        //   buyerAddress: buyerValues?.address,
+        //   buyerRegistrationType: buyerValues?.customertype,
 
-      const finalError = vr?.error || arrayError || "Something went wrong";
-
-      if (vr.statusCode === "01") {
-        Swal.fire({ icon: "error", title: "Error", text: finalError });
-        return;
-      }
-
-      if (vr.statusCode === "00") {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Invoice sent to FBR portal successfully",
-        });
-
-        const localRes = await postLocalInvoice({
-          invoiceType: "Sale Invoice",
-          invoiceDate: date,
-          sellerNTNCNIC: signupValuesNtnCnic,
-          sellerBusinessName: signupValues?.BusinessName,
-          sellerProvince: signupValues?.Province,
-          sellerAddress: signupValues?.Address,
-
-          buyerNTNCNIC: buyerValues?.ntnCnic,
-          buyerBusinessName: buyerValues?.name,
-          buyerProvince: buyerValues?.province,
-          buyerAddress: buyerValues?.address,
-          buyerRegistrationType: buyerValues?.customertype,
-
-          invoiceRefNo: "",
-          scenarioId: selectedScenarioId,
-          items: submitInvoiceData,
-          FBRToken: signupValues?.FBRToken,
-          fbrResponse: data?.invoiceNumber,
-          fbrResponseDate: data?.dated,
-          grandTotal,
-        });
-
-        Swal.fire({
-          icon: localRes?.status ? "success" : "error",
-          title: localRes?.status ? "Saved" : "Error",
-          text: localRes?.status
-            ? localRes.message
-            : localRes?.message || "Failed to save invoice locally",
-        });
-      }
-    };
-
-    submitToLocalApi();
-  }, [data]);
+        //   invoiceNo,
+        //   dcNo,
+        //   invoiceRefNo: "",
+        //   scenarioId: selectedScenarioId,
+        //   items: localItems,
+        //   FBRToken: signupValues?.FBRToken,
+        //   fbrResponse: data?.invoiceNumber,
+        //   fbrResponseDate: data?.dated,
+        //   grandTotal,
+        // };
+        //   console.log("Local API payload:", localApiPayload);
+  // }
   return (
     <>
       {loading ? (

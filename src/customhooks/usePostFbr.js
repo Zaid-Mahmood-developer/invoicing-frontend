@@ -14,9 +14,12 @@ export const usePostFbr = (url) => {
       const response = await axios.post(url, payload, { headers });
         
       setData(response?.data);
+      return response?.data;
     } catch (err) {
+      const message = err?.response?.data || "Something went wrong";
       setData(null);
-      setError(err?.response?.data || "Something went wrong");
+      setError(message);
+      return { error: message };
     } finally {
       setLoading(false);
     }

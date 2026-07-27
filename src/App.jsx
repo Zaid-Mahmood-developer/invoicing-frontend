@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Customers from "./Components/ProtectedRoutes/Customers/Customers";
 import Products from "./Components/ProtectedRoutes/Products/Products";
@@ -17,7 +16,7 @@ import ResetPassword from "./Components/Auth/ResetPassword";
 import ChangePassword from "./Components/Auth/ChangePassword";
 import { useSession } from "./customhooks/useSession";
 export default function App() {
-  useSession()
+  useSession();
   const signupkey = import.meta.env.VITE_SECRET_SIGNUP_KEY;
   return (
     <Router>

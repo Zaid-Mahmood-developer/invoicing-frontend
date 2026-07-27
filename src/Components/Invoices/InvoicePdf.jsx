@@ -43,7 +43,9 @@ const InvoicePdf = ({ invoice }) => {
                         <strong>Date:</strong> {invoice?.invoiceDate}<br />
                         <strong>NTN:</strong> {invoice?.sellerNTNCNIC}<br />
                         <strong>Province:</strong> {invoice?.sellerProvince}<br />
-                        <strong>Address:</strong> {invoice?.sellerAddress}
+                        <strong>Address:</strong> {invoice?.sellerAddress} <br/>
+                        <strong>Invoice No:</strong> {invoice?.invoiceNumber} <br/>
+                        <strong>DC Bo.:</strong> {invoice?.dcNo}
                     </p>
                 </div>
             </div>
@@ -113,6 +115,8 @@ const InvoicePdf = ({ invoice }) => {
                     <tr style={{ background: "#0A5275", color: "white", textAlign: "left" }}>
                         <th>HS Code</th>
                         <th>Sale Type</th>
+                        <th>PO#</th>
+                        <th>Quantity (Numbers)</th>
                         <th>Price</th>
                         <th>Qty</th>
                         <th>Unit</th>
@@ -135,6 +139,8 @@ const InvoicePdf = ({ invoice }) => {
                         >
                             <td>{item.hsCode}</td>
                             <td>{item.saleType}</td>
+                            <td>{item.poNumber}</td>
+                            <td>{item.quantityInNumber}</td>
                             <td>{item.price}</td>
                             <td>{item.quantity}</td>
                             <td>{item.uoM}</td>

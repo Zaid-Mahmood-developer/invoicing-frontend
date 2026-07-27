@@ -5,6 +5,7 @@ import { todayTile, monthTile } from "./dummyUtils";
 import { useGetApi } from "../../../customhooks/useGetApi";
 import InvoicePdf from "../../Invoices/InvoicePdf";
 import Spinner from "../../utils/Spinner/Spinner"
+
 const MainDashboard = () => {
     const [invoiceData, setInvoiceData] = useState(null);
     const handlePrint = (fbrId, data) => {
@@ -65,7 +66,7 @@ const MainDashboard = () => {
         <Spinner />
     :
          <div
-            className="container-fluid main-dashboard vh-100 p-4"
+            className="container-fluid main-dashboard min-vh-100 p-4"
             style={{
                 background: "linear-gradient(135deg, #0A5275 0%, #0b0b0b 100%)",
                 padding: "20px",
@@ -117,7 +118,7 @@ const MainDashboard = () => {
                                             ? Number(getValue(item.key)).toFixed(2)
                                             : "0"}
                                     </h3>
-                                    <p className="mb-0">{item.currentTime}</p>
+                                    <p className="mb-0">{item.currentTime} </p>
                                 </div>
                             </div>
                         </div>
@@ -151,6 +152,8 @@ const MainDashboard = () => {
                                 <th className="py-2 px-4 text-uppercase">Date</th>
                                 <th className="py-2 px-4 text-uppercase">Invoice #</th>
                                 <th className="py-2 px-4 text-uppercase">Customer</th>
+                                {/* <th className="py-2 px-4 text-uppercase">PO#</th>
+                                <th className="py-2 px-4 text-uppercase">Quantity (numbers)</th> */}
                                 <th className="py-2 px-4 text-uppercase">Qunatity</th>
                                 <th className="py-2 px-4 text-uppercase">Price</th>
                                 <th className="py-2 px-4 text-uppercase">Sales Tax</th>
@@ -170,6 +173,8 @@ const MainDashboard = () => {
                                             <td>{invoice.invoiceDate}</td>
                                             <td>{invoice.fbrResponse}</td>
                                             <td>{invoice.sellerBusinessName}</td>
+                                            {/* <td>{invoice.poNumber}</td>
+                                            <td>{invoice.quantityInNumber}</td> */}
                                             <td>{item.quantity}</td>
                                             <td>{item.price}</td>
                                             <td>{item.rate}</td>
