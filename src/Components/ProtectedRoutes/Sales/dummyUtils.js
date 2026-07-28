@@ -64,7 +64,8 @@ export const SRO_ItemSerial_Options_ZeroRate = {
  "SECTION 49": ["", "1"],
  "SECTION 4(b)": [""],
 };
-export const validationSchema = Yup.object({
+export const getValidationSchema = (requiresQuantityInNumber = false) =>
+  Yup.object({
 
   InvoiceNo: Yup.string()
     .max(10, "Invoice No cannot exceed 10 characters")
@@ -78,7 +79,17 @@ export const validationSchema = Yup.object({
     otherwise: (schema) => schema.notRequired(),
   }),
   productValue: Yup.string().required("Product name is required"),
-    scenarioId: Yup.string().required("Scenario ID is a required field"),
+  scenarioId: Yup.string().required("Scenario ID is a required field"),
+  quantityInNumber: requiresQuantityInNumber
+    ? Yup.number()
+        .typeError("Quantity in numbers must be a number")
+        .positive("Quantity in numbers must be greater than 0")
+        .required("Quantity in numbers is required")
+    : Yup.number()
+        .transform((value, originalValue) =>
+          originalValue === "" ? undefined : value,
+        )
+        .notRequired(),
   productQty: Yup.number()
     .typeError("Quantity must be a number")
     .positive("Quantity must be greater than 0")

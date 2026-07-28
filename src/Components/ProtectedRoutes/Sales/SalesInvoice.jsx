@@ -13,6 +13,7 @@ const SalesInvoice = ({
   signupValues,
   buyerValues,
   selectedScenarioId,
+  usesQuantityInNumber,
   invoiceNo,
   dcNo,
 }) => {
@@ -21,9 +22,11 @@ const SalesInvoice = ({
 
   const postFbrApiUrl = import.meta.env.VITE_API_URL_FBR_SALES_URL;
   const postLocalApiUrl = `${import.meta.env.VITE_API_URL}saleinvoice`;
-
-  const { registerUser: postFbrInvoice, loading } = usePostFbr(postFbrApiUrl);
-  const { registerUser: postLocalInvoice } = usePostApi(postLocalApiUrl);
+  const { registerUser: postFbrInvoice, loading: fbrLoading } =
+    usePostFbr(postFbrApiUrl);
+  const { registerUser: postLocalInvoice, loading: localLoading } =
+    usePostApi(postLocalApiUrl);
+  const loading = fbrLoading || localLoading;
 
   const [grandTotal, setGrandTotal] = useState(0);
   const [submitInvoiceData, setSubmitInvoiceData] = useState([]);
@@ -55,10 +58,19 @@ const SalesInvoice = ({
       scenarioId: selectedScenarioId,
     };
 
-    const fbrResponse = await postFbrInvoice(
-      { ...commonPayload, items: submitInvoiceData },
-      { Authorization: `Bearer ${signupValues?.FBRToken}` }
-    );
+    const removeQuantityInNumber = (item) => {
+      const cleanedItem = { ...item };
+      delete cleanedItem.quantityInNumber;
+      return cleanedItem;
+    };
+
+    // FBR accepts Product Quantity only.
+    const fbrItems = submitInvoiceData.map(removeQuantityInNumber);
+    const fbrPayload = { ...commonPayload, items: fbrItems };
+
+    const fbrResponse = await postFbrInvoice(fbrPayload, {
+      Authorization: `Bearer ${signupValues?.FBRToken}`,
+    });
 
     if (fbrResponse?.error) {
       Swal.fire({
@@ -89,16 +101,24 @@ const SalesInvoice = ({
       return;
     }
 
-    const localItems = submitInvoiceData.map((item, index) => ({
-      ...item,
-      poNumber: getProductsData[index]?.poNumber ?? "",
-      quantityInNumber:
-        getProductsData[index]?.quantityInNumber === ""
-          ? ""
-          : Number(getProductsData[index]?.quantityInNumber ?? 0),
-    }));
+    // Only the designated seller stores both quantity fields locally.
+    const localItems = submitInvoiceData.map((item, index) => {
+      const localItem = {
+        ...item,
+        poNumber: getProductsData[index]?.poNumber ?? "",
+      };
 
-    const localResponse = await postLocalInvoice({
+      if (usesQuantityInNumber) {
+        localItem.quantityInNumber = Number(
+          getProductsData[index]?.quantityInNumber ?? 0,
+        );
+        return localItem;
+      }
+
+      return removeQuantityInNumber(localItem);
+    });
+
+    const localApiPayload = {
       ...commonPayload,
       invoiceNo,
       dcNo,
@@ -107,7 +127,9 @@ const SalesInvoice = ({
       fbrResponse: fbrResponse?.invoiceNumber,
       fbrResponseDate: fbrResponse?.dated,
       grandTotal,
-    });
+    };
+
+    const localResponse = await postLocalInvoice(localApiPayload);
 
     if (localResponse?.error || localResponse?.status === false) {
       Swal.fire({
@@ -152,9 +174,11 @@ const SalesInvoice = ({
         fixedNotifiedValueOrRetailPrice,
         salesTaxWithheldAtSource,
         extraTax,
+        quantityInNumber,
       } = item;
 
       const qty = Number(productQty) || 0;
+      const numericQuantity = Number(quantityInNumber) || 0;
       const price = Number(productPrice) || 0;
 
       let valueExcludingST = 0;
@@ -177,7 +201,7 @@ const SalesInvoice = ({
       }
 
       else {
-        valueExcludingST = qty * price;
+        valueExcludingST = (usesQuantityInNumber ? numericQuantity : qty) * price;
         salesTaxApplicable = valueExcludingST * (taxType.salesTaxValue / 100);
 
         if (buyerValues?.customertype === "Unregistered" && furtherTax) {
@@ -195,6 +219,7 @@ const SalesInvoice = ({
         saleType: taxType.saleType,
 
         quantity: qty,
+        quantityInNumber: numericQuantity,
         price: price,
 
         valueSalesExcludingST: Number(valueExcludingST.toFixed(2)),
@@ -227,44 +252,9 @@ const SalesInvoice = ({
     );
 
     setGrandTotal(Number(total.toFixed(2)));
-  }, [getProductsData]);
+  }, [buyerValues?.customertype, getProductsData, usesQuantityInNumber]);
 
-  // const submitInvoice = () => {
-        // const localItems = submitInvoiceData.map((item, index) => ({
-        //   ...item,
-        //   poNumber: getProductsData[index]?.poNumber ?? "",
-        //   quantityInNumber:
-        //     getProductsData[index]?.quantityInNumber === ""
-        //       ? ""
-        //       : Number(getProductsData[index]?.quantityInNumber ?? 0),
-        // }));
 
-        // const localApiPayload = {
-        //   invoiceType: "Sale Invoice",
-        //   invoiceDate: date,
-        //   sellerNTNCNIC: signupValuesNtnCnic,
-        //   sellerBusinessName: signupValues?.BusinessName,
-        //   sellerProvince: signupValues?.Province,
-        //   sellerAddress: signupValues?.Address,
-
-        //   buyerNTNCNIC: buyerValues?.ntnCnic,
-        //   buyerBusinessName: buyerValues?.name,
-        //   buyerProvince: buyerValues?.province,
-        //   buyerAddress: buyerValues?.address,
-        //   buyerRegistrationType: buyerValues?.customertype,
-
-        //   invoiceNo,
-        //   dcNo,
-        //   invoiceRefNo: "",
-        //   scenarioId: selectedScenarioId,
-        //   items: localItems,
-        //   FBRToken: signupValues?.FBRToken,
-        //   fbrResponse: data?.invoiceNumber,
-        //   fbrResponseDate: data?.dated,
-        //   grandTotal,
-        // };
-        //   console.log("Local API payload:", localApiPayload);
-  // }
   return (
     <>
       {loading ? (
@@ -291,6 +281,7 @@ const SalesInvoice = ({
                   <th>UOM</th>
                   <th>Tax Type</th>
                   <th>Quantity</th>
+                  {usesQuantityInNumber && <th>Quantity in Numbers</th>}
                   <th>Price</th>
                   <th>Sales Tax</th>
                   <th>Further Tax</th>
@@ -309,6 +300,7 @@ const SalesInvoice = ({
                     <td>{item.uoM}</td>
                     <td>{item.saleType}</td>
                     <td>{item.quantity}</td>
+                    {usesQuantityInNumber && <td>{item.quantityInNumber}</td>}
                     <td>{item.price}</td>
                     <td>{item.rate}</td>
                     <td>{item.furtherTax}</td>

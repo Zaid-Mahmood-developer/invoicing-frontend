@@ -4,7 +4,7 @@ import SalesInvoice from "./SalesInvoice";
 import { IoAddOutline } from "react-icons/io5";
 import { RxUpdate } from "react-icons/rx";
 import {
-  validationSchema,
+  getValidationSchema,
   initialValues,
   buyerInfo,
   scenarioId,
@@ -16,6 +16,7 @@ import {
 import Swal from "sweetalert2";
 import { useGetApi } from "../../../customhooks/useGetApi";
 import Spinner from "../../utils/Spinner/Spinner";
+import { useSelector } from "react-redux";
 const Sales = () => {
   const getSellerUrl = `${import.meta.env.VITE_API_URL}seller/details`;
   const getAllCustomers = `${import.meta.env.VITE_API_URL}customer`;
@@ -53,9 +54,19 @@ const Sales = () => {
   } = useGetApi(null, false);
 
   const [sellerInfo, setSellerInfo] = useState(null);
+  const loggedInUser = useSelector((state) => state.submitStore?.user);
+  const sellerEmail = String(
+    loggedInUser?.email ??
+      loggedInUser?.Email ??
+      sellerInfo?.email ??
+      sellerInfo?.Email ??
+      "",
+  ).toLowerCase();
+  const usesQuantityInNumber = sellerEmail === "rai.abbas82@gmail.com";
+
   const formik = useFormik({
     initialValues,
-    validationSchema,
+    validationSchema: getValidationSchema(usesQuantityInNumber),
     onSubmit: (values, { resetForm }) => {
       const {
         InvoiceNo,
@@ -63,7 +74,10 @@ const Sales = () => {
         invoiceType,
         ...itemValues
       } = values;
-      const beforeTax = values.productQty * values.productPrice;
+      const calculationQuantity = usesQuantityInNumber
+        ? Number(values.quantityInNumber)
+        : Number(values.productQty);
+      const beforeTax = calculationQuantity * Number(values.productPrice);
       const price = values.productPrice;
       let afterTax =
         beforeTax +
@@ -759,29 +773,38 @@ const Sales = () => {
                   />
                 </div>
 
-                {/* Number Quantity */}
-
-                <div
-                  className="inputLabelData"
-                  style={{ marginBottom: "10px" }}
-                >
-                  <label className="w-25" style={{ fontWeight: "600" }}>
-                    Quantity in numbers
-                  </label>
-                  <input
-                    type="number"
-                    name="quantityInNumber"
-                    className="form-control my-2"
-                    value={formik.values.quantityInNumber}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    style={{
-                      borderColor: "#0A5275",
-                      backgroundColor: "#d9edf2",
-                      color: "#0A5275",
-                    }}
-                  />
-                </div>
+                {/* Quantity in numbers is available only to the designated seller. */}
+                {usesQuantityInNumber && (
+                  <>
+                    <div
+                      className="inputLabelData"
+                      style={{ marginBottom: "10px" }}
+                    >
+                      <label className="w-25" style={{ fontWeight: "600" }}>
+                        Quantity in numbers
+                      </label>
+                      <input
+                        type="number"
+                        name="quantityInNumber"
+                        className="form-control my-2"
+                        value={formik.values.quantityInNumber}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        style={{
+                          borderColor: "#0A5275",
+                          backgroundColor: "#d9edf2",
+                          color: "#0A5275",
+                        }}
+                      />
+                    </div>
+                    {formik.touched.quantityInNumber &&
+                      formik.errors.quantityInNumber && (
+                        <div style={{ color: "red", textAlign: "center" }}>
+                          {formik.errors.quantityInNumber}
+                        </div>
+                      )}
+                  </>
+                )}
 
                 {/* Quantity */}
                 <div
@@ -921,7 +944,10 @@ const Sales = () => {
                             formik.values.productQty *
                             formik.values.productPrice
                           ).toFixed(2)
-                        : formik.values.productQty * formik.values.productPrice
+                        : (usesQuantityInNumber
+                            ? formik.values.quantityInNumber
+                            : formik.values.productQty) *
+                          formik.values.productPrice
                     }
                     readOnly
                     style={{
@@ -974,16 +1000,22 @@ const Sales = () => {
                           })()
                         : // Normal goods (unchanged logic)
                           (
-                            formik.values.productQty *
+                            (usesQuantityInNumber
+                              ? formik.values.quantityInNumber
+                              : formik.values.productQty) *
                               formik.values.productPrice +
-                            formik.values.productQty *
+                            (usesQuantityInNumber
+                              ? formik.values.quantityInNumber
+                              : formik.values.productQty) *
                               formik.values.productPrice *
                               Number(
                                 retrieveProductValues?.taxType?.salesTaxValue /
                                   100,
                               ) +
                             (retrieveValues?.customertype === "Unregistered"
-                              ? formik.values.productQty *
+                              ? (usesQuantityInNumber
+                                  ? formik.values.quantityInNumber
+                                  : formik.values.productQty) *
                                 formik.values.productPrice *
                                 (formik.values.furtherTax / 100)
                               : 0)
@@ -1202,6 +1234,7 @@ const Sales = () => {
                 editMode={editModeAndProductNameAndCustomerValue.editMode}
                 buyerValues={retrieveValues}
                 selectedScenarioId={selectedScenarioId}
+                usesQuantityInNumber={usesQuantityInNumber}
                 invoiceNo={formik.values.InvoiceNo}
                 dcNo={formik.values.DCNo}
               />
