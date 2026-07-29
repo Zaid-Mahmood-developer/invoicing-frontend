@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/api/users/:path*",
+      "destination": "https://invoicing-backend-three.vercel.app/api/users/:path*"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

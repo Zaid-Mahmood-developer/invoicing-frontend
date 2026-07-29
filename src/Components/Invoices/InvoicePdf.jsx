@@ -43,9 +43,28 @@ const InvoicePdf = ({ invoice }) => {
                         <strong>Date:</strong> {invoice?.invoiceDate}<br />
                         <strong>NTN:</strong> {invoice?.sellerNTNCNIC}<br />
                         <strong>Province:</strong> {invoice?.sellerProvince}<br />
-                        <strong>Address:</strong> {invoice?.sellerAddress} <br/>
-                        <strong>Invoice No:</strong> {invoice?.invoiceNumber} <br/>
-                        <strong>DC Bo.:</strong> {invoice?.dcNo}
+                        <span
+                            style={{
+                                display: "inline-grid",
+                                gridTemplateColumns: "auto 24ch",
+                                alignItems: "start",
+                                columnGap: "6px",
+                                lineHeight: 1.5
+                            }}
+                        >
+                            <strong>Address:</strong>
+                            <span
+                                style={{
+                                    textAlign: "left",
+                                    overflowWrap: "break-word"
+                                }}
+                            >
+                                {invoice?.sellerAddress}
+                            </span>
+                        </span>
+                        <br />
+                        <strong>Invoice No:</strong> {invoice?.invoiceNo} <br/>
+                        <strong>DC No:</strong> {invoice?.dcNo}
                     </p>
                 </div>
             </div>
