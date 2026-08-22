@@ -124,7 +124,7 @@ const Sales = () => {
           ? Swal.fire({
               icon: "error",
               title: "Oops...",
-              text: "Product name and HSS code already existed!",
+              text: "Product name already existed!",
             })
           : (updated[editIndex] = combineEditProductValues);
         setGetProductsData(updated);
@@ -151,7 +151,7 @@ const Sales = () => {
           ? Swal.fire({
               icon: "error",
               title: "Oops...",
-              text: "Product name and HSS code already existed!",
+              text: "Product name already existed!",
             })
           : setGetProductsData((prev) => [...prev, combineProductValue]);
       }

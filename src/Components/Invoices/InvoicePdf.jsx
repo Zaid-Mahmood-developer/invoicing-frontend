@@ -136,6 +136,7 @@ const InvoicePdf = ({ invoice }) => {
                         <th>Sale Type</th>
                         <th>PO#</th>
                         <th>Quantity (Numbers)</th>
+                        <th>Product Description</th>
                         <th>Price</th>
                         <th>Qty</th>
                         <th>Unit</th>
@@ -160,6 +161,7 @@ const InvoicePdf = ({ invoice }) => {
                             <td>{item.saleType}</td>
                             <td>{item.poNumber}</td>
                             <td>{item.quantityInNumber}</td>
+                            <td>{item.productDescription}</td>
                             <td>{item.price}</td>
                             <td>{item.quantity}</td>
                             <td>{item.uoM}</td>

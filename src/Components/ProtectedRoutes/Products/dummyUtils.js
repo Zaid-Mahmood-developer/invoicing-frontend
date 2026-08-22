@@ -32,7 +32,7 @@ export const initialValues = {
 
 export const validationSchema = Yup.object({
   hsCode: Yup.string()
-    .matches(/^\d{4}\.\d{4}$/, "HS Code must be in ####.#### format")
+    // .matches(/^\d{4}\.\d{4}$/, "HS Code must be in ####.#### format")
     .required("HS Code is required"),
   description: Yup.string()
     .max(60, "Description must be at most 60 characters")
