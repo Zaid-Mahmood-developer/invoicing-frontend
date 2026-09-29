@@ -15,6 +15,7 @@ import ForgotPassword from "./Components/Auth/ForgotPassword";
 import ResetPassword from "./Components/Auth/ResetPassword";
 import ChangePassword from "./Components/Auth/ChangePassword";
 import { useSession } from "./customhooks/useSession";
+import PaymentOverdue from "./Components/Auth/PaymentOverdue";
 export default function App() {
   useSession();
   const signupkey = import.meta.env.VITE_SECRET_SIGNUP_KEY;
@@ -22,6 +23,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+         <Route path="/payment-overdue" element={<PaymentOverdue />} />
         <Route path={`/signup/${signupkey}`} element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -36,6 +38,7 @@ export default function App() {
           <Route path="/erp" element={<ERPIntegration />} />
           <Route path="/about" element={<About />} />
         </Route>
+       
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

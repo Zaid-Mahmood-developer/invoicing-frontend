@@ -28,22 +28,32 @@ const Login = () => {
     };
 
     useEffect(() => {
-        if (data?.user) {
-            Swal.fire({
-                icon: "success",
-                title: "Success",
-                text: data?.message
-            });
-            dispatch(setUser(data?.user));
-            navigate("/home");
-        } else if (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: error?.message || "Something went wrong!"
-            }).then(() => navigate("/"));
-        }
-    }, [data, error, navigate]);
+  if (error?.code === "PAYMENT_OVERDUE") {
+    dispatch(setUser(null));
+    navigate("/payment-overdue", { replace: true });
+    return;
+  }
+
+  if (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: error?.message || "Something went wrong!",
+    });
+    return;
+  }
+
+  if (data?.user) {
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: data.message,
+    });
+
+    dispatch(setUser(data.user));
+    navigate("/home", { replace: true });
+  }
+}, [data, error, dispatch, navigate]);
 
     return (
         <div

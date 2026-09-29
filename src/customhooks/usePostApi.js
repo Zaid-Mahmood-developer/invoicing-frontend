@@ -10,7 +10,7 @@ export const usePostApi = (url) => {
     try {
       setLoading(true);
       setError(null);
-
+      setData(null);
       const response = await axios.post(
         url,
         payload,
