@@ -118,7 +118,7 @@ const Products = () => {
     <Spinner />
   ) : (
     <div
-      className="container-fluid p-4 main-dashboard vh-100"
+      className="container-fluid p-4 main-dashboard min-vh-100"
       style={{
         background: "linear-gradient(135deg, #0A5275 0%, #0b0b0b 100%)",
       }}
@@ -293,13 +293,13 @@ const Products = () => {
 
       {/* PRODUCT TABLE */}
       <div
-        className="table-responsive shadow-lg rounded-4 p-3 mt-4"
+        className="shadow-lg rounded-4 p-3 mt-4"
         style={{
           background: "rgba(255,255,255,0.88)",
           backdropFilter: "blur(6px)",
         }}
       >
-        <table className="table table-hover text-center">
+        <table className="table-responsive table table-hover text-center" >
           <thead style={{ background: "#0A5275", color: "white" }}>
             <tr>
               <th>#</th>

@@ -119,7 +119,7 @@ const editCustomerFunc = (id) => {
         <Spinner />
       ) : (
         <div
-          className="container-fluid p-4 main-dashboard vh-100"
+          className="container-fluid p-4 main-dashboard min-vh-100"
           style={{
             background: "linear-gradient(135deg, #0A5275 0%, #0b0b0b 100%)",
           }}
