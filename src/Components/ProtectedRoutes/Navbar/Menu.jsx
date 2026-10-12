@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { navMenu } from "../Navbar/dummyUtils";
 import { useEffect, useState } from "react";
@@ -7,6 +8,7 @@ import { Navbar, Nav, Container, Dropdown } from "react-bootstrap";
 import Spinner from "../../utils/Spinner/Spinner";
 import logo from "../../../assets/logo/logo-2.png"
 export default function MainDashboard() {
+  const user = useSelector(state => state.submitStore.user);
   const logoutUrl = `${import.meta.env.VITE_API_URL}logout`;
 
   const { registerUser, data, loading, error } = usePostApi(logoutUrl);
@@ -135,6 +137,8 @@ export default function MainDashboard() {
                   {item.title}
                 </Nav.Link>
               ))}
+
+              {user?.role === "admin" && <Nav.Link as={Link} to="/users" className="text-white">Users</Nav.Link>}
 
               {/* Dropdown */}
               <Dropdown align="end" className="ms-md-3">

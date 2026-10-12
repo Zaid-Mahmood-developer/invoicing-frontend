@@ -2,7 +2,7 @@ import { Form, Col, Row, Button } from "react-bootstrap";
 import { Formik, Field, Form as FormikForm, ErrorMessage } from "formik";
 import { loginFields, validationSchema, initialValues } from "./dummyUtils";
 import Spinner from "../utils/Spinner/Spinner";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
@@ -22,6 +22,8 @@ const Login = () => {
     const { registerUser, data, loading, error } = usePostApi(postUrl);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const adminLogin = searchParams.get("admin") === "1";
 
     const handleSubmit = async (values) => {
         await registerUser({ ...values });
@@ -51,7 +53,7 @@ const Login = () => {
     });
 
     dispatch(setUser(data.user));
-    navigate("/home", { replace: true });
+    navigate(data.user.role === "admin" ? "/users" : "/home", { replace: true });
   }
 }, [data, error, dispatch, navigate]);
 
@@ -92,10 +94,10 @@ const Login = () => {
                             style={{ width: "140px", marginBottom: "10px"}}
                         />
                         <h2 style={{ color: styles.primary, fontWeight: 700 }}>
-                            Welcome Back
+                            {adminLogin ? "Administrator sign in" : "Welcome Back"}
                         </h2>
                         <p style={{ color: "#444", margin: 0 }}>
-                            Login to your DevOx Syndicate account
+                            {adminLogin ? "Sign in with your administrator account to manage users." : "Login to your DevOx Syndicate account"}
                         </p>
                     </div>
 

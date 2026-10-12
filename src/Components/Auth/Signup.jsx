@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { usePostApi } from "../../customhooks/usePostApi";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { signupVals } from "../../redux/Slices/LoginValuesSlice";
 import Spinner from "../utils/Spinner/Spinner";
 import logo from "../../assets/logo/logo-2.png";
@@ -23,6 +23,7 @@ const Signup = () => {
   const postUrl = `${import.meta.env.VITE_API_URL}signup`;
   const { registerUser, data, loading, error } = usePostApi(postUrl);
   const dispatch = useDispatch();
+  const user = useSelector(state => state.submitStore.user);
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
@@ -98,6 +99,12 @@ const Signup = () => {
                 Create an Account
               </h3>
               {/* <p style={{ color: "#555" }}>Join the DevOx Syndicate</p> */}
+            </div>
+
+            <div className="text-center mb-3">
+              <Button as={Link} to={user?.role === "admin" ? "/users" : "/?admin=1"} variant="outline-primary">
+                Admin · Manage users
+              </Button>
             </div>
 
             <Formik
