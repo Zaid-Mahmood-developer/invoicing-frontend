@@ -25,7 +25,6 @@ export const initialValues = {
 export const validationSchema = Yup.object({
   name: Yup.string()
     .matches(/^[A-Za-z ]*$/, "Only alphabets and spaces allowed")
-    .max(30, "Maximum 30 characters allowed")
     .required("Customer name is required"),
   ntnCnic: Yup.string()
   .required("NTN or CNIC is required")
